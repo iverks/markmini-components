@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Markmini components test page</title>
+  <link rel="stylesheet" href="./src/index.css" />
+  <script type="module" src="/src/t-spoiler.ts"></script>
+</head>
+
+<body>
+  <main class="document">
+    <h1>Spoiler</h1>
+    <t-spoiler>
+      <h2>Spoiler content</h2>
+    </t-spoiler>
+
+    <h1>Test input</h1>
+    <ul class="helpbar">
+      <li><button id="spoilerbutton">Insert spoiler</button></li>
+      <li><button id="quotebutton">Insert quote</button></li>
+    </ul>
+    <textarea class="testinput" placeholder="Input for testing" id="textinput"></textarea>
+
+    <h1>Test output</h1>
+    <div class=" test-output" id="textoutput">No output</div>
+  </main>
+
+  <script lang="js">
+    const input = document.getElementById("textinput");
+    const output = document.getElementById("textoutput");
+    const ievent = new Event('input');
+
+
+    input.addEventListener("input", () => {
+      const text = input.value;
+      output.innerHTML = text;
+    });
+
+    const spoilerbutton = document.getElementById("spoilerbutton");
+    spoilerbutton.addEventListener("click", () => {
+      const st = input.selectionStart;
+      const en = input.selectionEnd;
+      const text = input.value;
+      const textBefore = text.substring(0, st);
+      const textBetween = text.substring(st, en);
+      const textAfter = text.substring(en, text.length);
+
+      const openingTag = "<t-spoiler>";
+      input.value = textBefore + openingTag + textBetween + "</t-spoiler>" + textAfter;
+      input.focus();
+      input.setSelectionRange(st + openingTag.length, en + openingTag.length);
+      input.dispatchEvent(ievent);
+    });
+
+    const quotebutton = document.getElementById("quotebutton");
+    quotebutton.addEventListener("click", () => {
+      const st = input.selectionStart;
+      const en = input.selectionEnd;
+      const text = input.value;
+      const textBefore = text.substring(0, st);
+      const textBetween = text.substring(st, en);
+      const textAfter = text.substring(en, text.length);
+
+      const openingTag = "<t-quote>";
+      input.value = textBefore + openingTag + textBetween + "</t-quote>" + textAfter;
+      input.focus();
+      input.setSelectionRange(st + openingTag.length, en + openingTag.length);
+      input.dispatchEvent(ievent);
+    });
+
+  </script>
+</body>
+
+</html>
