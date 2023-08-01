@@ -1,7 +1,5 @@
 import { LitElement, css, html } from 'lit';
-import { customElement, property, state, query } from 'lit/decorators.js';
-import { animate } from '@lit-labs/motion';
-
+import { customElement, property, query, state } from 'lit/decorators.js';
 
 /**
  * An example element.
@@ -15,109 +13,62 @@ export class TSpoiler extends LitElement {
   public isOpen = true;
 
   @state()
-  private isExpanding = false;
-
-  @state()
-  private isClosing = false;
-
-  @state()
   private animation?: Animation = undefined;
 
-  @query("details")
-  private el!: HTMLElement;
+  // State variables necessary for handling animation canceling
+  @state()
+  private isShrinking = false;
+  @state()
+  private isExpanding = false;
 
-  @query("summary")
-  private summary!: HTMLElement;
-
-  @query(".content")
+  @query("#content")
   private content!: HTMLElement;
-
-  private open() {
-    this.el.style.height = `${this.el.offsetHeight}px`;
-    this.isOpen = true;
-    window.requestAnimationFrame(() => this.expand());
-  }
-
-  expand() {
-    // Set the element as "being expanding"
-    this.isExpanding = true;
-    // Get the current fixed height of the element
-    const startHeight = `${this.el.offsetHeight}px`;
-    // Calculate the open height of the element (summary height + content height)
-    const endHeight = `${this.summary.offsetHeight + this.content.offsetHeight}px`;
-
-    // If there is already an animation running
-    if (this.animation) {
-      // Cancel the current animation
-      this.animation.cancel();
-    }
-    console.log(startHeight, endHeight);
-
-    // Start a WAAPI animation
-    this.animation = this.el.animate({
-      height: [startHeight, endHeight]
-    }, {
-      duration: 400,
-      easing: 'ease-out'
-    });
-    // When the animation is complete, call onAnimationFinish()
-    this.animation.onfinish = () => this.onAnimationFinish(true);
-    // If the animation is cancelled, isExpanding variable is set to false
-    this.animation.oncancel = () => this.isExpanding = false;
-  }
-
-  private shrink() {
-    this.isClosing = true;
-
-    // Store the current height of the element
-    const startHeight = this.el.offsetHeight;
-    // Calculate the height of the summary
-    const endHeight = this.summary.offsetHeight;
-
-    // If there is already an animation running
-    if (this.animation) {
-      // Cancel the current animation
-      this.animation.cancel();
-    }
-
-    // Start a WAAPI animation
-    this.animation = this.el.animate({
-      height: [`${startHeight}px`, `${endHeight}px`],
-      // transform: ["translate(0)", `translate(${startHeight - endHeight}px)`]
-    }, {
-      duration: 400,
-      easing: 'ease-out'
-    });
-
-    // When the animation is complete, call onAnimationFinish()
-    this.animation.onfinish = () => this.onAnimationFinish(false);
-    // If the animation is cancelled, isClosing variable is set to false
-    this.animation.oncancel = () => this.isClosing = false;
-  }
-
-  onAnimationFinish(open: boolean) {
-    // Set the open attribute based on the parameter
-    this.isOpen = open;
-    // Clear the stored animation
-    this.animation = undefined;
-    // Reset isClosing & isExpanding
-    this.isClosing = false;
-    this.isExpanding = false;
-    // Remove the overflow hidden and the fixed height
-    this.el.style.height = this.el.style.overflow = '';
-  }
-
 
   private onClick(e: Event) {
     e.preventDefault();
-    // Add an overflow on the <details> to avoid content overflowing
-    this.el.style.overflow = 'hidden';
 
-    if (this.isClosing || !this.isOpen) {
-      this.open();
-    } else if (this.isExpanding || this.isOpen) {
+    if (this.isExpanding || this.isOpen) {
       this.shrink();
+    } else if (this.isShrinking || !this.isOpen) {
+      this.expand();
     }
+  }
+
+  private expand() {
+    if (this.animation) {
+      this.animation.cancel();
+    }
+
+    this.isExpanding = true;
+    const endHeight = this.content.offsetHeight;
+    this.isOpen = true; // Note: changes visibility
+    this.animation = this.content.animate({
+      height: ["0px", `${endHeight}px`]
+    },
+      100);
+    this.animation.oncancel = () => {
+      this.isExpanding = false;
+    };
+  }
+
+  private shrink() {
+    if (this.animation) {
+      this.animation.cancel();
+    }
+
+    this.isShrinking = true;
+    const startHeight = this.content.offsetHeight;
+    this.animation = this.content.animate({
+      height: [`${startHeight}px`, "0px"]
+    },
+      100);
+    this.animation.onfinish = () => {
+      this.isOpen = false;
+      this.isShrinking = false;
+    };
+    this.animation.oncancel = () => {
+      this.isShrinking = false;
+    };
   }
 
   render() {
@@ -126,8 +77,8 @@ export class TSpoiler extends LitElement {
         <summary class="header">
           <slot name="header">Spoiler</slot><span>▶</span>
         </summary>
-        <div class="content ${this.isOpen ? 'shown' : 'hidden'}" ${animate()}>
-          <slot></slot>
+        <div class="content" id="content">
+          <slot>Default text</slot>
         </div>
       </details>
     `;
@@ -149,6 +100,8 @@ export class TSpoiler extends LitElement {
 
     .content {
       border: 1px solid gray;
+      position: relative;
+      overflow: hidden;
     }
 
     details > summary {
