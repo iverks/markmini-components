@@ -7,14 +7,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Markmini components test page</title>
   <link rel="stylesheet" href="./src/index.css" />
-  <script type="module" src="/src/t-spoiler.ts"></script>
+  <script type="module" src="/src/main.ts"></script>
+  <style>
+    t-spoiler {
+      width: 200px;
+    }
+  </style>
 </head>
 
 <body>
   <main class="document">
     <h1>Spoiler</h1>
     <t-spoiler>
-      <h2>Spoiler content</h2>
+      <span slot="header">Hemmelig</span>
+      <h2 style="color: red;">Spoiler content</h2>
+    </t-spoiler>
+    <t-spoiler>
+      <h2 style="color: red;">Spoiler content</h2>
     </t-spoiler>
 
     <h1>Test input</h1>
@@ -26,6 +35,7 @@
 
     <h1>Test output</h1>
     <div class=" test-output" id="textoutput">No output</div>
+
   </main>
 
   <script lang="js">

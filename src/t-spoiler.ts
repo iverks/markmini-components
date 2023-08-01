@@ -24,6 +24,9 @@ export class TSpoiler extends LitElement {
   @query("#content")
   private content!: HTMLElement;
 
+  @query("#triangle")
+  private triangle!: HTMLElement;
+
   private onClick(e: Event) {
     e.preventDefault();
 
@@ -46,6 +49,9 @@ export class TSpoiler extends LitElement {
       height: ["0px", `${endHeight}px`]
     },
       100);
+    try {
+      this.triangle.classList.add("rotated");
+    } catch { }
     this.animation.oncancel = () => {
       this.isExpanding = false;
     };
@@ -62,6 +68,9 @@ export class TSpoiler extends LitElement {
       height: [`${startHeight}px`, "0px"]
     },
       100);
+    try {
+      this.triangle.classList.remove("rotated");
+    } catch { }
     this.animation.onfinish = () => {
       this.isOpen = false;
       this.isShrinking = false;
@@ -75,9 +84,9 @@ export class TSpoiler extends LitElement {
     return html`
       <details ?open=${this.isOpen} @click=${this.onClick}>
         <summary class="header">
-          <slot name="header">Spoiler</slot><span>▶</span>
+          <slot name="header"><span>Spoiler</span></slot> <div id="triangle" class="triangle rotated">▶</div>
         </summary>
-        <div class="content" id="content">
+        <div class="t-spoiler-content" id="content">
           <slot>Default text</slot>
         </div>
       </details>
@@ -86,19 +95,28 @@ export class TSpoiler extends LitElement {
 
   static styles = css`
     :host {
+      display: block;
       max-width: 1280px;
-      margin: 0 auto;
       padding: 2rem;
       text-align: left;
     }
 
     .header {
       border: 1px solid gray;
-      background-color: firebrick;
-
+      padding-inline: 1rem;
+      padding-block: 0.1rem;
     }
 
-    .content {
+    .triangle {
+      display: inline-block;
+      transition: transform 100ms;
+    }
+
+    .triangle.rotated {
+      transform: rotate(90deg);
+    }
+
+    .t-spoiler-content {
       border: 1px solid gray;
       position: relative;
       overflow: hidden;
