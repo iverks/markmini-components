@@ -102,9 +102,9 @@ export class TSpoiler extends LitElement {
     }
 
     .header {
-      border: 1px solid gray;
       padding-inline: 1rem;
       padding-block: 0.1rem;
+      background-color: var(--t-spoiler-header-bg,  rgb(80, 80, 80));
     }
 
     .triangle {
@@ -117,9 +117,11 @@ export class TSpoiler extends LitElement {
     }
 
     .t-spoiler-content {
-      border: 1px solid gray;
       position: relative;
       overflow: hidden;
+      background-color: var(--t-spoiler-header-bg, rgb(60, 60, 60));
+      padding-inline: 1rem;
+      padding-block: 0.1rem;
     }
 
     details > summary {
