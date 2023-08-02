@@ -15,7 +15,8 @@
 
     /* the container of the web component can be styled */
     t-spoiler {
-      width: 50%;
+      /* width: 50%; */
+      width: inherit;
     }
   </style>
 </head>
@@ -104,7 +105,7 @@
     input.addEventListener("input", () => {
       let text = input.value;
       // Manually open spoiler tags for editing :)
-      text = text.replace("<t-spoiler>", "<t-spoiler open>")
+      text = text.replaceAll("<t-spoiler>", "<t-spoiler open>")
       output.innerHTML = text;
     });
 

@@ -74,8 +74,8 @@ export class TSpoiler extends LitElement {
 
   render() {
     return html`
-      <details ?open=${this.open} @click=${this.onClick}>
-        <summary class="header">
+      <details ?open=${this.open}>
+        <summary class="header" @click=${this.onClick}>
           <slot name="header"><span>Spoiler</span></slot> <div id="triangle" class="triangle ${this.open && "rotated"}">▶</div>
         </summary>
         <div class="t-spoiler-content" id="content">
