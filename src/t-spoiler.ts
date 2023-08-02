@@ -24,9 +24,6 @@ export class TSpoiler extends LitElement {
   @query("#content")
   private content!: HTMLElement;
 
-  @query("#triangle")
-  private triangle!: HTMLElement;
-
   private onClick(e: Event) {
     e.preventDefault();
 
