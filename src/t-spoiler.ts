@@ -10,7 +10,7 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 @customElement('t-spoiler')
 export class TSpoiler extends LitElement {
   @property({ type: Boolean })
-  public isOpen = true;
+  public open = false;
 
   @state()
   private animation?: Animation = undefined;
@@ -30,9 +30,9 @@ export class TSpoiler extends LitElement {
   private onClick(e: Event) {
     e.preventDefault();
 
-    if (this.isExpanding || this.isOpen) {
+    if (this.isExpanding || this.open) {
       this.shrink();
-    } else if (this.isShrinking || !this.isOpen) {
+    } else if (this.isShrinking || !this.open) {
       this.expand();
     }
   }
@@ -44,14 +44,12 @@ export class TSpoiler extends LitElement {
 
     this.isExpanding = true;
     const endHeight = this.content.offsetHeight;
-    this.isOpen = true; // Note: changes visibility
+    this.open = true; // Note: changes visibility
     this.animation = this.content.animate({
       height: ["0px", `${endHeight}px`]
     },
       100);
-    try {
-      this.triangle.classList.add("rotated");
-    } catch { }
+
     this.animation.oncancel = () => {
       this.isExpanding = false;
     };
@@ -68,11 +66,8 @@ export class TSpoiler extends LitElement {
       height: [`${startHeight}px`, "0px"]
     },
       100);
-    try {
-      this.triangle.classList.remove("rotated");
-    } catch { }
     this.animation.onfinish = () => {
-      this.isOpen = false;
+      this.open = false;
       this.isShrinking = false;
     };
     this.animation.oncancel = () => {
@@ -82,9 +77,9 @@ export class TSpoiler extends LitElement {
 
   render() {
     return html`
-      <details ?open=${this.isOpen} @click=${this.onClick}>
+      <details ?open=${this.open} @click=${this.onClick}>
         <summary class="header">
-          <slot name="header"><span>Spoiler</span></slot> <div id="triangle" class="triangle rotated">▶</div>
+          <slot name="header"><span>Spoiler</span></slot> <div id="triangle" class="triangle ${this.open && "rotated"}">▶</div>
         </summary>
         <div class="t-spoiler-content" id="content">
           <slot>Default text</slot>
@@ -97,14 +92,16 @@ export class TSpoiler extends LitElement {
     :host {
       display: block;
       max-width: 1280px;
-      padding: 2rem;
+      margin: 1rem 0;
       text-align: left;
+      box-shadow: 0 0 2px black;
     }
 
     .header {
       padding-inline: 1rem;
-      padding-block: 0.1rem;
+      padding-block: 0.4rem;
       background-color: var(--t-spoiler-header-bg,  rgb(80, 80, 80));
+      min-height: 1rem;
     }
 
     .triangle {
@@ -122,6 +119,7 @@ export class TSpoiler extends LitElement {
       background-color: var(--t-spoiler-header-bg, rgb(60, 60, 60));
       padding-inline: 1rem;
       padding-block: 0.1rem;
+      min-height: 2rem;
     }
 
     details > summary {

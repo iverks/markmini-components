@@ -9,6 +9,11 @@
   <link rel="stylesheet" href="./src/index.css" />
   <script type="module" src="/src/main.ts"></script>
   <style>
+    body {
+      margin-bottom: 30vh;
+    }
+
+    /* the container of the web component can be styled */
     t-spoiler {
       width: 50%;
     }
@@ -20,20 +25,72 @@
     <h1>Spoiler</h1>
     <t-spoiler>
       <span slot="header">Hemmelig</span>
-      <h2 style="color: red;">Spoiler content</h2>
+      <h2 style="color: red;">This spoiler has a custom header using</h2>
+      <p>
+      <pre>
+<code>&lt;span slot="header"&gt;Hemmelig&lt;/span&gt;</code>
+      </pre>
+      </p>
     </t-spoiler>
     <t-spoiler>
-      <h2 style="color: red;">Spoiler content</h2>
+      <p>This is the default header</p>
+      <p>
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Eveniet sit numquam eos, alias vero doloremque esse
+        illum dignissimos perferendis quas aliquam inventore soluta fugiat ab eius. Harum ut sapiente sint consequuntur
+        optio voluptatibus distinctio quaerat dolore nam consequatur mollitia consectetur nihil enim similique, minima
+        rem dolor magnam repellat vero in unde doloribus voluptatem. Harum deserunt expedita rem nesciunt,
+        exercitationem doloribus natus quam rerum nemo eligendi repudiandae molestias accusantium! Temporibus esse, sit
+        eaque sed iusto autem suscipit itaque officia modi, enim neque iste qui eligendi illum. Suscipit fugiat unde
+        aspernatur, tempora rerum asperiores nisi maiores ad laudantium atque, assumenda hic delectus.
+      </p>
     </t-spoiler>
 
-    <h1>Test input</h1>
+    <h1>Quote</h1>
+    <t-quote>
+      <h2 style="color: red;">Quotes uten navn faller tilbake til dette</h2>
+    </t-quote>
+    <t-quote name="Iver">
+      <h2 style="color: red;">Man kan sette navn enkelt ved å skrive</h2>
+      <pre>
+        <code>
+&lt;t-quote name="Iver"&gt;&lt;/t-quote&gt;
+        </code>
+      </pre>
+    </t-quote>
+    <t-quote>
+      <span slot="header"><a href="https://www.timini.no/profile/view/628">Iver Karlsbakk Småge</a></span>
+      <p>Men i virkeligheten ser det penest ut om vi bruker</p>
+      <pre>
+        <code>
+&lt;t-quote&gt;
+  &lt;span slot="header"&gt;&lt;a href="https://www.timini.no/profile/view/628"&gt;Iver Karlsbakk Småge&lt;/a&gt;&lt;/span&gt;
+  Some text to be inside quote
+&lt;/t-quote&gt;
+        </code>
+      </pre>
+      <p>Det er ganske verbose, men i kombinasjon med markmini™ blir det så enkelt som å skrive</p>
+      <pre>
+        <code>
+&lt;t-quote&gt;
+  &lt;span slot="header"&gt;@iverks&lt;/span&gt;
+  Some text to be inside quote
+&lt;/t-quote&gt;
+        </code>
+      </pre>
+    </t-quote>
+
+    <h1>Prøv selv under</h1>
+    <p>Jeg har ikke inkludert markdown-parsing eller rensking i denne demoen, det er bare for å teste web-componentene
+    </p>
+    <h2>Test input</h2>
     <ul class="helpbar">
       <li><button id="spoilerbutton">Insert spoiler</button></li>
       <li><button id="quotebutton">Insert quote</button></li>
+      <li><button id="quotewtagbutton">Insert quote with tag</button></li>
     </ul>
     <textarea class="testinput" placeholder="Input for testing" id="textinput"></textarea>
 
-    <h1>Test output</h1>
+    <h2>Test output</h2>
     <div class=" test-output" id="textoutput">No output</div>
 
   </main>
@@ -45,12 +102,13 @@
 
 
     input.addEventListener("input", () => {
-      const text = input.value;
+      let text = input.value;
+      // Manually open spoiler tags for editing :)
+      text = text.replace("<t-spoiler>", "<t-spoiler open>")
       output.innerHTML = text;
     });
 
-    const spoilerbutton = document.getElementById("spoilerbutton");
-    spoilerbutton.addEventListener("click", () => {
+    function insertTag(openingTag, closeTag) {
       const st = input.selectionStart;
       const en = input.selectionEnd;
       const text = input.value;
@@ -58,27 +116,31 @@
       const textBetween = text.substring(st, en);
       const textAfter = text.substring(en, text.length);
 
-      const openingTag = "<t-spoiler>";
-      input.value = textBefore + openingTag + textBetween + "</t-spoiler>" + textAfter;
+      input.value = textBefore + openingTag + textBetween + closeTag + textAfter;
       input.focus();
       input.setSelectionRange(st + openingTag.length, en + openingTag.length);
       input.dispatchEvent(ievent);
+    }
+
+    const spoilerbutton = document.getElementById("spoilerbutton");
+    spoilerbutton.addEventListener("click", () => {
+      const openingTag = "<t-spoiler>\n";
+      const closeTag = "\n</t-spoiler>";
+      insertTag(openingTag, closeTag);
     });
 
     const quotebutton = document.getElementById("quotebutton");
     quotebutton.addEventListener("click", () => {
-      const st = input.selectionStart;
-      const en = input.selectionEnd;
-      const text = input.value;
-      const textBefore = text.substring(0, st);
-      const textBetween = text.substring(st, en);
-      const textAfter = text.substring(en, text.length);
+      const openingTag = "<t-quote name=\"";
+      const closeTag = "\">\n\n</t-quote>";
+      insertTag(openingTag, closeTag);
+    });
 
-      const openingTag = "<t-quote>";
-      input.value = textBefore + openingTag + textBetween + "</t-quote>" + textAfter;
-      input.focus();
-      input.setSelectionRange(st + openingTag.length, en + openingTag.length);
-      input.dispatchEvent(ievent);
+    const quotewtagbutton = document.getElementById("quotewtagbutton");
+    quotewtagbutton.addEventListener("click", () => {
+      const openingTag = "<t-quote>\n<span slot=\"header\"><a href=\"https://www.timini.no/profile/view/628\">Iver Karlsbakk Småge</a></span>\n";
+      const closeTag = "\n</t-quote>";
+      insertTag(openingTag, closeTag);
     });
 
   </script>
